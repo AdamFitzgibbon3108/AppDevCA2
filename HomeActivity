@@ -4,9 +4,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+import android.view.View;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,9 +19,9 @@ import java.util.HashMap;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private EditText nameField, dobField, bookNameField, reviewField;
+    private EditText nameField, dobField, bookNameField, reviewField, categoryField, searchField;
     private RadioGroup statusRadioGroup;
-    private Button updateProfileButton, addBookButton, updateBookButton;
+    private Button updateProfileButton, addBookButton, updateBookButton, searchButton, removeBookButton;
     private DatabaseReference databaseReference;
 
     @Override
@@ -36,16 +37,22 @@ public class HomeActivity extends AppCompatActivity {
         dobField = findViewById(R.id.dobField);
         bookNameField = findViewById(R.id.bookNameField);
         reviewField = findViewById(R.id.reviewField);
+        categoryField = findViewById(R.id.categoryField); // New category input field
         statusRadioGroup = findViewById(R.id.statusRadioGroup);
+        searchField = findViewById(R.id.searchField); // Search field for searching books
 
         updateProfileButton = findViewById(R.id.updateProfileButton);
         addBookButton = findViewById(R.id.addBookButton);
         updateBookButton = findViewById(R.id.updateBookButton);
+        searchButton = findViewById(R.id.searchButton);
+        removeBookButton = findViewById(R.id.removeBookButton);
 
         // Set listeners for buttons
         updateProfileButton.setOnClickListener(view -> updateProfile());
         addBookButton.setOnClickListener(view -> addBook());
         updateBookButton.setOnClickListener(view -> updateBookDetails());
+        searchButton.setOnClickListener(view -> searchBook());
+        removeBookButton.setOnClickListener(view -> removeBook());
     }
 
     private void updateProfile() {
@@ -61,7 +68,8 @@ public class HomeActivity extends AppCompatActivity {
         profileData.put("name", name);
         profileData.put("dob", dob);
 
-        databaseReference.child("profiles").child("user1") // Replace with dynamic user ID if available
+        // Replace with dynamic user ID if available
+        databaseReference.child("profiles").child("user1")
                 .setValue(profileData)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -75,6 +83,7 @@ public class HomeActivity extends AppCompatActivity {
     private void addBook() {
         String bookName = bookNameField.getText().toString().trim();
         String review = reviewField.getText().toString().trim();
+        String category = categoryField.getText().toString().trim(); // Get category input
         int selectedStatusId = statusRadioGroup.getCheckedRadioButtonId();
 
         if (TextUtils.isEmpty(bookName)) {
@@ -84,8 +93,10 @@ public class HomeActivity extends AppCompatActivity {
 
         String status = (selectedStatusId == R.id.statusFinished) ? "Finished" : "In Progress";
 
-        Book newBook = new Book(bookName, review, status);
+        // Create new Book object with name, review, status, and category
+        Book newBook = new Book(bookName, review, status, category);
 
+        // Add book to Firebase
         databaseReference.child("books").push()
                 .setValue(newBook)
                 .addOnCompleteListener(task -> {
@@ -100,6 +111,7 @@ public class HomeActivity extends AppCompatActivity {
     private void updateBookDetails() {
         String bookName = bookNameField.getText().toString().trim();
         String review = reviewField.getText().toString().trim();
+        String category = categoryField.getText().toString().trim();
         int selectedStatusId = statusRadioGroup.getCheckedRadioButtonId();
 
         if (TextUtils.isEmpty(bookName)) {
@@ -121,6 +133,7 @@ public class HomeActivity extends AppCompatActivity {
                                 snapshot.getRef().updateChildren(new HashMap<String, Object>() {{
                                     put("review", review);
                                     put("status", status);
+                                    put("category", category);  // Update category if necessary
                                 }});
                                 Toast.makeText(HomeActivity.this, "Book updated successfully", Toast.LENGTH_SHORT).show();
                                 break;
@@ -131,6 +144,98 @@ public class HomeActivity extends AppCompatActivity {
                         }
                     } else {
                         Toast.makeText(HomeActivity.this, "Error fetching books", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Search for a book
+    private void searchBook() {
+        String bookName = searchField.getText().toString().trim();
+        String status = "";
+        String category = categoryField.getText().toString().trim(); // Get category for search
+
+        // Get selected status from RadioGroup
+        int selectedStatusId = statusRadioGroup.getCheckedRadioButtonId();
+        if (selectedStatusId == R.id.statusFinished) {
+            status = "Finished";
+        } else if (selectedStatusId == R.id.statusInProgress) {
+            status = "In Progress";
+        }
+
+        // Check if at least one search criterion is provided
+        if (TextUtils.isEmpty(bookName) && TextUtils.isEmpty(status) && TextUtils.isEmpty(category)) {
+            Toast.makeText(this, "Please enter a book name, status, or category to search", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Declare variables as final to use them in lambda expression
+        final String finalBookName = bookName;
+        final String finalStatus = status;
+        final String finalCategory = category;
+
+        // Search for books by name, status, and category
+        databaseReference.child("books")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        boolean bookFound = false;
+                        for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                            Book book = snapshot.getValue(Book.class);
+                            if (book != null) {
+                                boolean matches = true;
+
+                                // Match book name (case insensitive and trimmed)
+                                if (!TextUtils.isEmpty(finalBookName) && !book.getName().trim().equalsIgnoreCase(finalBookName)) {
+                                    matches = false;
+                                }
+
+                                // Match status if provided
+                                if (!TextUtils.isEmpty(finalStatus) && !book.getStatus().equalsIgnoreCase(finalStatus)) {
+                                    matches = false;
+                                }
+
+                                // Match category if provided
+                                if (!TextUtils.isEmpty(finalCategory) && !book.getCategory().equalsIgnoreCase(finalCategory)) {
+                                    matches = false;
+                                }
+
+                                // If all criteria match, display the book and break the loop
+                                if (matches) {
+                                    bookFound = true;
+                                    Toast.makeText(HomeActivity.this, "Book found: " + book.getName(), Toast.LENGTH_SHORT).show();
+                                    removeBookButton.setVisibility(View.VISIBLE); // Show remove button
+                                    removeBookButton.setTag(snapshot.getKey()); // Store the book key for removal
+                                    break;
+                                }
+                            }
+                        }
+                        if (!bookFound) {
+                            Toast.makeText(HomeActivity.this, "Book not found", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(HomeActivity.this, "Error fetching books", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Remove a book
+    private void removeBook() {
+        String bookKey = (String) removeBookButton.getTag(); // Get the book's Firebase key
+
+        if (bookKey == null) {
+            Toast.makeText(this, "No book selected for removal", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Remove the book from Firebase
+        databaseReference.child("books").child(bookKey)
+                .removeValue()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(HomeActivity.this, "Book removed successfully", Toast.LENGTH_SHORT).show();
+                        removeBookButton.setVisibility(View.GONE); // Hide remove button after successful deletion
+                    } else {
+                        Toast.makeText(HomeActivity.this, "Failed to remove book", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

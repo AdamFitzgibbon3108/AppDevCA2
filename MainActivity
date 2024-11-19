@@ -2,24 +2,31 @@ package com.example.appdevca2;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
     private EditText emailField, passwordField;
+    private TextView passwordStrengthText, emailErrorText;
     private Button signUpButton, signInButton;
+    private ImageButton passwordVisibilityToggle;
     private DatabaseReference databaseReference;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,72 +35,148 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firebase Database reference
         databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        Log.d(TAG, "Firebase initialized: " + databaseReference.toString());
 
         // Initialize views
         emailField = findViewById(R.id.emailField);
         passwordField = findViewById(R.id.passwordField);
         signUpButton = findViewById(R.id.signUpButton);
         signInButton = findViewById(R.id.signInButton);
+        passwordStrengthText = findViewById(R.id.passwordStrengthText);
+        emailErrorText = findViewById(R.id.emailErrorText);
+        passwordVisibilityToggle = findViewById(R.id.passwordVisibilityToggle);
 
         // Set up button listeners
-        signUpButton.setOnClickListener(view -> signUp());
-        signInButton.setOnClickListener(view -> signIn());
+        signUpButton.setOnClickListener(view -> {
+            Log.d(TAG, "Sign Up button clicked!");
+            Toast.makeText(MainActivity.this, "Sign Up button clicked", Toast.LENGTH_SHORT).show();
+            signUp();
+        });
+
+        signInButton.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, SignInActivity.class);
+            startActivity(intent);
+        });
+
+        // Set up password strength TextWatcher
+        passwordField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+                // Not needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                String password = charSequence.toString();
+                if (isPasswordStrong(password)) {
+                    passwordStrengthText.setText("Strong password");
+                    passwordStrengthText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                } else if (isPasswordMedium(password)) {
+                    passwordStrengthText.setText("Medium password");
+                    passwordStrengthText.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
+                } else {
+                    passwordStrengthText.setText("Weak password");
+                    passwordStrengthText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                }
+                passwordStrengthText.setVisibility(password.isEmpty() ? TextView.GONE : TextView.VISIBLE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Not needed
+            }
+        });
+
+        // Set up password visibility toggle
+        passwordVisibilityToggle.setOnClickListener(v -> togglePasswordVisibility());
     }
 
     private void signUp() {
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
+        Log.d(TAG, "Email entered: " + email);
+        Log.d(TAG, "Password entered: " + password);
 
-        // Check if fields are empty
-        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(MainActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+        // Validate email
+        if (TextUtils.isEmpty(email) || !isValidEmail(email)) {
+            emailErrorText.setVisibility(TextView.VISIBLE);
+            emailErrorText.setText("Please enter a valid email");
+            Toast.makeText(MainActivity.this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Invalid email");
+            return;
+        } else {
+            emailErrorText.setVisibility(TextView.GONE);
+        }
+
+        // Validate password
+        if (TextUtils.isEmpty(password) || !isValidPassword(password)) {
+            Toast.makeText(MainActivity.this, "Password must be at least 6 characters and contain a special character", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Invalid password");
             return;
         }
 
-        // Store user data in the Realtime Database
-        databaseReference.child(email.replace(".", ",")).setValue(password)
+        Log.d(TAG, "Proceeding with Firebase registration...");
+
+        // Convert email to Firebase-friendly key format
+        String userEmailKey = email.replace(".", ",");
+
+        // Write user data to Firebase Realtime Database
+        databaseReference.child(userEmailKey).setValue(password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(MainActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "User registered with email: " + email);
+
+                        // Optional: Navigate to sign-in screen after successful registration
+                        Intent intent = new Intent(MainActivity.this, SignInActivity.class);
+                        startActivity(intent);
                     } else {
                         Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Registration failed: " + task.getException());
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Database error: " + e.getMessage());
                 });
     }
 
-    private void signIn() {
-        String email = emailField.getText().toString().trim();
-        String password = passwordField.getText().toString().trim();
+    private boolean isValidEmail(String email) {
+        return email.contains("@") && email.contains(".");
+    }
 
-        // Check if fields are empty
-        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(MainActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
-            return;
+    private boolean isValidPassword(String password) {
+        return password.length() >= 6 && containsSpecialCharacter(password);
+    }
+
+    private boolean containsSpecialCharacter(String password) {
+        String specialCharacters = "!@#$%^&*()_+={}[]|:;<>,.?/~`";
+        for (int i = 0; i < password.length(); i++) {
+            if (specialCharacters.indexOf(password.charAt(i)) >= 0) {
+                return true;
+            }
         }
+        return false;
+    }
 
-        // Retrieve and validate user data from the Realtime Database
-        databaseReference.child(email.replace(".", ",")).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String storedPassword = snapshot.getValue(String.class);
-                    if (storedPassword != null && storedPassword.equals(password)) {
-                        Toast.makeText(MainActivity.this, "Sign in successful", Toast.LENGTH_SHORT).show();
-                        // Optionally, navigate to a new activity after successful login
-                        Intent intent = new Intent(MainActivity.this, HomeActivity.class); // HomeActivity is a placeholder
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Sign in failed: Incorrect password", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(MainActivity.this, "Sign in failed: User not found", Toast.LENGTH_SHORT).show();
-                }
-            }
+    // Check the strength of the password
+    private boolean isPasswordStrong(String password) {
+        return password.length() >= 8 && containsSpecialCharacter(password);
+    }
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Sign in failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    private boolean isPasswordMedium(String password) {
+        return password.length() >= 6 && containsSpecialCharacter(password);
+    }
+
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            passwordField.setInputType(129); // Hide password (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
+            passwordVisibilityToggle.setImageResource(android.R.drawable.ic_menu_view); // Set "eye" icon
+        } else {
+            passwordField.setInputType(145); // Show password (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
+            passwordVisibilityToggle.setImageResource(android.R.drawable.ic_menu_close_clear_cancel); // Set "eye-off" icon
+        }
+        isPasswordVisible = !isPasswordVisible;
+        passwordField.setSelection(passwordField.getText().length()); // Move cursor to the end of the text
     }
 }

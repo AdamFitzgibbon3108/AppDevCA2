@@ -4,15 +4,18 @@ public class Book {
     private String name;
     private String review;
     private String status;
+    private String category;  // New field for category
 
     // Default constructor (required for Firebase)
     public Book() {
     }
 
-    public Book(String name, String review, String status) {
+    // Constructor with name, review, status, and category
+    public Book(String name, String review, String status, String category) {
         this.name = name;
         this.review = review;
         this.status = status;
+        this.category = category;  // Initialize category
     }
 
     // Getter and Setter methods for book name
@@ -42,6 +45,15 @@ public class Book {
         this.status = status;
     }
 
+    // Getter and Setter methods for category
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     // Method to check if the review is empty
     public boolean hasReview() {
         return review != null && !review.isEmpty();
@@ -49,8 +61,7 @@ public class Book {
 
     @Override
     public String toString() {
-        return "Book{name='" + name + "', review='" + review + "', status='" + status + "'}";
+        return "Book{name='" + name + "', review='" + review + "', status='" + status + "', category='" + category + "'}";
     }
 }
-
 

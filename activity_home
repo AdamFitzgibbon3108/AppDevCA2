@@ -217,6 +217,17 @@
             android:visibility="gone"
             android:layout_marginBottom="16dp" />
 
+        <TextView
+            android:id="@+id/bookDetailsTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" /> <!-- Initially hidden -->
+
+
         <!-- RecyclerView to display the list of books -->
         <TextView
             android:id="@+id/bookListTitle"

@@ -8,20 +8,24 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 import android.view.View;
 import android.util.Log;
-
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
 
     private EditText nameField, dobField, bookNameField, reviewField, categoryField, searchField;
     private RadioGroup statusRadioGroup;
     private Button updateProfileButton, addBookButton, updateBookButton, searchButton, removeBookButton;
+    private RecyclerView recyclerView;
+    private BookAdapter bookAdapter;
+    private List<Book> bookList;
     private DatabaseReference databaseReference;
 
     @Override
@@ -47,12 +51,42 @@ public class HomeActivity extends AppCompatActivity {
         searchButton = findViewById(R.id.searchButton);
         removeBookButton = findViewById(R.id.removeBookButton);
 
+        // RecyclerView setup
+        recyclerView = findViewById(R.id.recyclerView); // RecyclerView for displaying books
+        bookList = new ArrayList<>();
+        bookAdapter = new BookAdapter(this, bookList);  // Pass 'this' for context
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(bookAdapter);
+
         // Set listeners for buttons
         updateProfileButton.setOnClickListener(view -> updateProfile());
         addBookButton.setOnClickListener(view -> addBook());
         updateBookButton.setOnClickListener(view -> updateBookDetails());
         searchButton.setOnClickListener(view -> searchBook());
         removeBookButton.setOnClickListener(view -> removeBook());
+
+        // Load books on create
+        loadBooks();
+    }
+
+    private void loadBooks() {
+        databaseReference.child("books")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        bookList.clear(); // Clear the current list
+                        for (DataSnapshot snapshot : task.getResult().getChildren()) {
+                            Book book = snapshot.getValue(Book.class);
+                            if (book != null) {
+                                bookList.add(book);
+                            }
+                        }
+                        // Notify the adapter that data has changed
+                        bookAdapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(this, "Failed to load books", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void updateProfile() {
@@ -102,6 +136,7 @@ public class HomeActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(this, "Book added successfully", Toast.LENGTH_SHORT).show();
+                        loadBooks(); // Reload the books after adding
                     } else {
                         Toast.makeText(this, "Failed to add book", Toast.LENGTH_SHORT).show();
                     }
@@ -136,6 +171,7 @@ public class HomeActivity extends AppCompatActivity {
                                     put("category", category);  // Update category if necessary
                                 }});
                                 Toast.makeText(HomeActivity.this, "Book updated successfully", Toast.LENGTH_SHORT).show();
+                                loadBooks(); // Reload the books after updating
                                 break;
                             }
                         }
@@ -240,5 +276,3 @@ public class HomeActivity extends AppCompatActivity {
                 });
     }
 }
-
-

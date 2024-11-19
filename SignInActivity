@@ -1,10 +1,14 @@
 package com.example.appdevca2;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.DataSnapshot;
@@ -14,6 +18,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class SignInActivity extends AppCompatActivity {
+
+    private static final String TAG = "SignInActivity";
 
     private EditText emailField, passwordField;
     private Button signInButton;
@@ -32,7 +38,7 @@ public class SignInActivity extends AppCompatActivity {
         passwordField = findViewById(R.id.passwordField);
         signInButton = findViewById(R.id.signInButton);
 
-        // Sign-in button listener
+        // Set up button listener for sign-in
         signInButton.setOnClickListener(view -> signIn());
     }
 
@@ -40,31 +46,55 @@ public class SignInActivity extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(SignInActivity.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+        // Check if fields are empty
+        if (TextUtils.isEmpty(email)) {
+            Toast.makeText(SignInActivity.this, "Email cannot be empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            Toast.makeText(SignInActivity.this, "Password cannot be empty", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Validate email format
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(SignInActivity.this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Generate a Firebase key-friendly email key
+        String userEmailKey = email.replace(".", ",");
+        Log.d(TAG, "Attempting to sign in with key: " + userEmailKey);
+
         // Retrieve and validate user data from the Realtime Database
-        databaseReference.child(email.replace(".", ",")).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child(userEmailKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String storedPassword = snapshot.getValue(String.class);
                     if (storedPassword != null && storedPassword.equals(password)) {
                         Toast.makeText(SignInActivity.this, "Sign in successful", Toast.LENGTH_SHORT).show();
-                        // Proceed to next activity or main app page
+                        Log.d(TAG, "User signed in successfully with email: " + email);
+
+                        // Navigate to HomeActivity and pass the user's email key
+                        Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
+                        intent.putExtra("userEmailKey", userEmailKey); // Pass user email key
+                        startActivity(intent);
+                        finish(); // Close the SignInActivity after successful login
                     } else {
                         Toast.makeText(SignInActivity.this, "Sign in failed: Incorrect password", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Sign in failed: Password mismatch for email: " + email);
                     }
                 } else {
                     Toast.makeText(SignInActivity.this, "Sign in failed: User not found", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Sign in failed: No user found for email: " + email);
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(SignInActivity.this, "Sign in failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Firebase database error: " + error.getMessage());
             }
         });
     }

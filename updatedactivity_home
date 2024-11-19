@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- User Profile Section -->
+        <TextView
+            android:id="@+id/profileTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Profile"
+            android:textSize="16sp"
+            android:textColor="#6200EE"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/nameField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your name"
+            android:inputType="textPersonName"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/dobField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your date of birth"
+            android:inputType="date"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/updateProfileButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Profile"
+            android:textColor="#ffffff"
+            android:backgroundTint="#6200EE"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Book Section -->
+        <TextView
+            android:id="@+id/bookTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add/Update Book"
+            android:textSize="16sp"
+            android:textColor="#6200EE"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/bookNameField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter book name"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/authorField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter author name"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+
+        <EditText
+            android:id="@+id/categoryField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter book category"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/reviewField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter review"
+            android:inputType="textMultiLine"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/statusRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <RadioButton
+                android:id="@+id/statusFinished"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Finished"
+                android:padding="8dp" />
+
+            <RadioButton
+                android:id="@+id/statusInProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="In Progress"
+                android:padding="8dp" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/addBookButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Book"
+            android:textColor="#ffffff"
+            android:backgroundTint="#6200EE"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/updateBookButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Book"
+            android:textColor="#ffffff"
+            android:backgroundTint="#6200EE"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Search Section for Books -->
+        <TextView
+            android:id="@+id/searchBookTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search for a Book"
+            android:textSize="16sp"
+            android:textColor="#6200EE"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/searchField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter book name to search"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/categorySearchField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter category to search (optional)"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/statusSearchTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter by Status"
+            android:textSize="14sp"
+            android:textColor="#6200EE"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/searchStatusRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <RadioButton
+                android:id="@+id/searchStatusFinished"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Finished"
+                android:padding="8dp" />
+
+            <RadioButton
+                android:id="@+id/searchStatusInProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="In Progress"
+                android:padding="8dp" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/searchButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Search Book"
+            android:textColor="#ffffff"
+            android:backgroundTint="#6200EE"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/removeBookButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Remove Book"
+            android:textColor="#ffffff"
+            android:backgroundTint="#FF0000"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/bookDetailsTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" /> <!-- Initially hidden -->
+
+
+        <!-- RecyclerView to display the list of books -->
+        <TextView
+            android:id="@+id/bookListTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Books"
+            android:textSize="16sp"
+            android:textColor="#6200EE"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginBottom="16dp" />
+    </LinearLayout>
+</ScrollView>

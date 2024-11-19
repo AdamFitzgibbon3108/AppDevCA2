@@ -1,55 +1,66 @@
 package com.example.appdevca2;
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+public class Book {
+    private String name;
+    private String review;
+    private String status;
+    private String category;  // New field for category
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.List;
-
-public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder> {
-
-    private Context context;
-    private List<Book> books;
-
-    public BookAdapter(Context context, List<Book> books) {
-        this.context = context;
-        this.books = books;
+    // Default constructor (required for Firebase)
+    public Book() {
     }
 
-    @NonNull
+    // Constructor with name, review, status, and category
+    public Book(String name, String review, String status, String category) {
+        this.name = name;
+        this.review = review;
+        this.status = status;
+        this.category = category;  // Initialize category
+    }
+
+    // Getter and Setter methods for book name
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Getter and Setter methods for review
+    public String getReview() {
+        return review;
+    }
+
+    public void setReview(String review) {
+        this.review = review;
+    }
+
+    // Getter and Setter methods for book status
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    // Getter and Setter methods for category
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    // Method to check if the review is empty
+    public boolean hasReview() {
+        return review != null && !review.isEmpty();
+    }
+
     @Override
-    public BookViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.book_item, parent, false);
-        return new BookViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull BookViewHolder holder, int position) {
-        Book book = books.get(position);
-        holder.bookNameText.setText(book.getName());
-        holder.bookReviewText.setText(book.getReview());
-        holder.bookStatusText.setText(book.getStatus());
-    }
-
-    @Override
-    public int getItemCount() {
-        return books.size();
-    }
-
-    static class BookViewHolder extends RecyclerView.ViewHolder {
-
-        TextView bookNameText, bookReviewText, bookStatusText;
-
-        public BookViewHolder(@NonNull View itemView) {
-            super(itemView);
-            bookNameText = itemView.findViewById(R.id.bookNameText);
-            bookReviewText = itemView.findViewById(R.id.bookReviewText);
-            bookStatusText = itemView.findViewById(R.id.bookStatusText);
-        }
+    public String toString() {
+        return "Book{name='" + name + "', review='" + review + "', status='" + status + "', category='" + category + "'}";
     }
 }

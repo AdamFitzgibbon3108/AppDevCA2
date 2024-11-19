@@ -1,19 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:background="@android:color/white"
+    android:gravity="center">
 
+    <!-- Title Text -->
     <TextView
+        android:id="@+id/appTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Book Application"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#3b3b3b"
+        android:layout_gravity="center"
+        android:layout_marginBottom="40dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Email Input Field (with TextInputLayout) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/emailInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Email">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/emailField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:inputType="textEmailAddress"
+            android:importantForAccessibility="yes" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Email Validation Feedback TextView -->
+    <TextView
+        android:id="@+id/emailErrorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Invalid email format"
+        android:textSize="12sp"
+        android:textColor="#FF0000"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Password Input Field (with TextInputLayout) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/passwordInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Password">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/passwordField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:importantForAccessibility="yes"
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Password Strength Feedback TextView -->
+    <TextView
+        android:id="@+id/passwordStrengthText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Password strength: Weak"
+        android:textSize="14sp"
+        android:textColor="#FF0000"
+        android:layout_marginBottom="20dp"
+        android:visibility="gone" />
+
+    <!-- Password Visibility Toggle -->
+    <ImageButton
+        android:id="@+id/passwordVisibilityToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_view"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="Show/Hide Password"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="end" />
+
+    <!-- Sign Up Button -->
+    <Button
+        android:id="@+id/signUpButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sign Up"
+        android:textSize="16sp"
+        android:backgroundTint="#6200EE"
+        android:textColor="#ffffff"
+        android:padding="12dp"
+        android:layout_marginBottom="20dp"
+        android:layout_gravity="center" />
+
+    <!-- Go to Sign In Button -->
+    <Button
+        android:id="@+id/signInButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Go to Sign In"
+        android:textSize="16sp"
+        android:backgroundTint="#B0BEC5"
+        android:textColor="#ffffff"
+        android:padding="12dp"
+        android:layout_gravity="center" />
+
+    <!-- Optional Progress Bar (Invisible by default) -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center" />
+
+</LinearLayout>
+
